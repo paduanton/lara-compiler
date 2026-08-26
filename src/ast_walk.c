@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include "ast.h"
 
-/* TODO: also recurse into node->next (sibling chain) */
 int ast_count_nodes(const ast_node_t *node)
 {
     if (node == NULL)
@@ -16,6 +15,8 @@ int ast_count_nodes(const ast_node_t *node)
 
     for (int i = 0; i < AST_MAX_CHILDREN; i++)
         count += ast_count_nodes(node->children[i]);
+
+    count += ast_count_nodes(node->next);
 
     return count;
 }
