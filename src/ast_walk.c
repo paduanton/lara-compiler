@@ -36,12 +36,19 @@ int ast_count_leaves(const ast_node_t *node)
 
 static int max(int a, int b) { return (a > b) ? a : b; }
 
-/* TODO: implement — children add +1 depth, next stays at the same depth */
 int ast_max_depth(const ast_node_t *node)
 {
-    (void)node;
-    (void)max;
-    return 0;
+    if (node == NULL)
+        return -1;
+
+    int max_child_depth = -1;
+    for (int i = 0; i < AST_MAX_CHILDREN; i++)
+        max_child_depth = max(max_child_depth, ast_max_depth(node->children[i]));
+
+    int this_depth = max_child_depth + 1;
+    int next_depth = ast_max_depth(node->next);
+
+    return max(this_depth, next_depth);
 }
 
 void main_walk(const ast_node_t *root)
