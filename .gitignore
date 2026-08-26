@@ -4,6 +4,8 @@ lara
 src/lex.yy.c
 src/parser.tab.c
 src/parser.tab.h
+ast.dot
+ast.svg
 
 # Course-specific reference material — kept locally, not part of the public history
 doc/especificacao_etapa1.md

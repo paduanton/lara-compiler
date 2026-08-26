@@ -39,7 +39,7 @@ endif
 
 COMPOSE = docker compose -f docker/docker-compose.yml
 
-.PHONY: all clean test ast help docker-build docker-shell docker-test docker-ast
+.PHONY: all clean test ast ast-dot help docker-build docker-shell docker-test docker-ast
 
 all: $(TARGET)
 
@@ -101,6 +101,12 @@ ast: $(TARGET)
 	@echo "=== AST do programa de exemplo ==="
 	./$(TARGET) < tests/valid/01_hello.lc
 
+## Renders the AST of FILE as Graphviz .dot (and .svg if graphviz is installed)
+## Usage: make ast-dot FILE=tests/valid/01_hello.lc
+ast-dot: $(TARGET)
+	./$(TARGET) < $(FILE) | python3 tools/ast_to_dot.py > ast.dot
+	@command -v dot >/dev/null 2>&1 && dot -Tsvg ast.dot -o ast.svg && echo ">>> ast.dot e ast.svg gerados" || echo ">>> ast.dot gerado (graphviz não encontrado para gerar .svg)"
+
 docker-build:
 	$(COMPOSE) build
 
@@ -119,6 +125,7 @@ help:
 	@echo "  make clean        — remove arquivos gerados"
 	@echo "  make test         — executa suite de testes"
 	@echo "  make ast          — mostra AST do exemplo básico"
+	@echo "  make ast-dot      — gera ast.dot (e ast.svg) para FILE=<arquivo.lc>"
 	@echo "  make docker-build — constrói a imagem de desenvolvimento"
 	@echo "  make docker-shell — abre um shell dentro do container"
 	@echo "  make docker-test  — roda 'make test' dentro do container"
