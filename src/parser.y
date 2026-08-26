@@ -1,7 +1,5 @@
 /*
  * parser.y — LARA grammar (bison, LALR(1))
- *
- * TODO-D: expr_list_ne only matches a single expression (see below).
  */
 
 %{
@@ -367,10 +365,9 @@ expr_list
     | expr_list_ne   { $$ = $1;   }
     ;
 
-/* TODO-D: add `| expr_list_ne ',' expr { $$ = ast_append($1, $3); }` (same pattern as param_list_ne) */
 expr_list_ne
-    : expr
-        { $$ = $1; }
+    : expr                         { $$ = $1; }
+    | expr_list_ne ',' expr        { $$ = ast_append($1, $3); }
     ;
 
 lvalue
