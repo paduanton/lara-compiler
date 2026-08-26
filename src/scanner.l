@@ -28,8 +28,7 @@ ALNUM       [a-zA-Z0-9_]
 ID          {LETTER}{ALNUM}*
 INT         {DIGIT}+
 
-/* TODO: FLOAT needs an optional scientific-notation exponent, e.g. 1.5e10 */
-FLOAT       {DIGIT}*"."{DIGIT}+|{DIGIT}+"."{DIGIT}*
+FLOAT       ({DIGIT}*"."{DIGIT}+|{DIGIT}+"."{DIGIT}*)([eE][+-]?{DIGIT}+)?
 
 %%
 
