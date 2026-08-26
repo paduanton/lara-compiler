@@ -33,7 +33,7 @@ FLOAT       {DIGIT}*"."{DIGIT}+|{DIGIT}+"."{DIGIT}*
 
 %%
 
-[ \n]+      { /* TODO: also skip \t and \r */ }
+[ \n\t\r]+  { }
 
 "//".*      { }
 
