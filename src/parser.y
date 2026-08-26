@@ -1,7 +1,6 @@
 /*
  * parser.y — LARA grammar (bison, LALR(1))
  *
- * TODO-C: '&&'/'||' semantic actions are incomplete (see the expr rule).
  * TODO-D: expr_list_ne only matches a single expression (see below).
  */
 
@@ -315,15 +314,8 @@ expr
     | expr TK_OC_EQ expr    { $$ = ast_new(AST_EXPR_BINARY, "==", yylineno); $$->children[0]=$1; $$->children[1]=$3; }
     | expr TK_OC_NE expr    { $$ = ast_new(AST_EXPR_BINARY, "!=", yylineno); $$->children[0]=$1; $$->children[1]=$3; }
 
-    /* TODO-C: build AST_EXPR_BINARY nodes here (see the relational rules above for the pattern) */
-    | expr TK_OC_AND expr
-        {
-            $$ = NULL;
-        }
-    | expr TK_OC_OR expr
-        {
-            $$ = NULL;
-        }
+    | expr TK_OC_AND expr   { $$ = ast_new(AST_EXPR_BINARY, "&&", yylineno); $$->children[0]=$1; $$->children[1]=$3; }
+    | expr TK_OC_OR expr    { $$ = ast_new(AST_EXPR_BINARY, "||", yylineno); $$->children[0]=$1; $$->children[1]=$3; }
 
     | '!' expr
         {
