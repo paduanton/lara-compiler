@@ -21,11 +21,17 @@ int ast_count_nodes(const ast_node_t *node)
     return count;
 }
 
-/* TODO: implement — a leaf has every children[] slot NULL and next == NULL */
 int ast_count_leaves(const ast_node_t *node)
 {
-    (void)node;
-    return 0;
+    if (node == NULL)
+        return 0;
+
+    int count = 0;
+    for (int i = 0; i < AST_MAX_CHILDREN; i++)
+        count += ast_count_leaves(node->children[i]);
+    count += ast_count_leaves(node->next);
+
+    return (count == 0) ? 1 : count;
 }
 
 static int max(int a, int b) { return (a > b) ? a : b; }
