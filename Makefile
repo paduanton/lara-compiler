@@ -37,7 +37,9 @@ else
     FLEX_ENV =
 endif
 
-.PHONY: all clean test ast help
+COMPOSE = docker compose -f docker/docker-compose.yml
+
+.PHONY: all clean test ast help docker-build docker-shell docker-test docker-ast
 
 all: $(TARGET)
 
@@ -99,10 +101,26 @@ ast: $(TARGET)
 	@echo "=== AST do programa de exemplo ==="
 	./$(TARGET) < tests/valid/01_hello.lc
 
+docker-build:
+	$(COMPOSE) build
+
+docker-shell:
+	$(COMPOSE) run --rm dev bash
+
+docker-test:
+	$(COMPOSE) run --rm dev make test
+
+docker-ast:
+	$(COMPOSE) run --rm dev make ast
+
 help:
 	@echo "Alvos disponíveis:"
-	@echo "  make         — compila e gera ./lara"
-	@echo "  make clean   — remove arquivos gerados"
-	@echo "  make test    — executa suite de testes"
-	@echo "  make ast     — mostra AST do exemplo básico"
-	@echo "  make help    — exibe esta mensagem"
+	@echo "  make              — compila e gera ./lara"
+	@echo "  make clean        — remove arquivos gerados"
+	@echo "  make test         — executa suite de testes"
+	@echo "  make ast          — mostra AST do exemplo básico"
+	@echo "  make docker-build — constrói a imagem de desenvolvimento"
+	@echo "  make docker-shell — abre um shell dentro do container"
+	@echo "  make docker-test  — roda 'make test' dentro do container"
+	@echo "  make docker-ast   — roda 'make ast' dentro do container"
+	@echo "  make help         — exibe esta mensagem"
