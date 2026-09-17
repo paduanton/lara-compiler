@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert lara's textual AST dump (stdin) into a Graphviz .dot file (stdout).
 
-Usage: ./lara < program.lc | python3 tools/ast_to_dot.py > ast.dot
+Usage: ./lara --ast < program.lc | python3 tools/ast_to_dot.py > ast.dot
        dot -Tsvg ast.dot -o ast.svg   # optional, if graphviz is installed
 """
 import re
