@@ -43,7 +43,7 @@ endif
 
 COMPOSE = docker compose -f docker/docker-compose.yml
 
-.PHONY: all clean test test-memory ast ast-dot help docker-build docker-shell docker-test docker-ast
+.PHONY: all clean test test-memory ast ast-dot help docker-build docker-shell docker-test docker-ast package
 
 all: $(TARGET)
 
@@ -113,12 +113,16 @@ docker-test:
 docker-ast:
 	$(COMPOSE) run --rm dev make ast
 
+package:
+	$(PYTHON) tools/package_stage.py --stage 2
+
 help:
 	@echo "Alvos disponíveis:"
 	@echo "  make              — compila e gera ./lara"
 	@echo "  make clean        — remove arquivos gerados"
 	@echo "  make test         — executa suite de testes"
 	@echo "  make test-memory  — verifica memória com Valgrind"
+	@echo "  make package      — gera e valida ZIP e tar.gz da etapa atual"
 	@echo "  make ast          — mostra AST do exemplo básico"
 	@echo "  make ast-dot      — gera ast.dot (e ast.svg) para FILE=<arquivo.lc>"
 	@echo "  make docker-build — constrói a imagem de desenvolvimento"
