@@ -1,0 +1,10 @@
+fun int add(int a, int b) {
+    let sum := a + b;
+    return sum;
+}
+fun void main() {
+    let result := add(2, 3);
+    read result;
+    add(result, 1);
+    print result;
+}

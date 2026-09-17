@@ -1,0 +1,11 @@
+/* 09_expr_complexa.lc — Expressões aritméticas combinadas e aninhadas
+ * Testa: precedência, associatividade e parênteses
+ */
+fun void main() {
+    let a := 10 ;
+    let b := 2 ;
+    let c := 3 ;
+    let d := 4 ;
+    let r := (a + b) * (d - c) / (b + 1) % 5 ;
+    print r ;
+}

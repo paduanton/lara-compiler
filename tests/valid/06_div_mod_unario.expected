@@ -1,0 +1,23 @@
+    beginFunc main
+    local a, 0
+    a = 100
+    local b, 4
+    b = 7
+    local d, 8
+    _t1 = a / b
+    d = _t1
+    local m, 12
+    _t2 = a % b
+    m = _t2
+    local neg, 16
+    _t3 = -a
+    neg = _t3
+    local res, 20
+    _t4 = d + m
+    _t5 = -_t4
+    res = _t5
+    print d
+    print m
+    print neg
+    print res
+    endFunc main

@@ -1,0 +1,15 @@
+/* A multiline comment:
+   punctuation * / and embedded // are ignored.
+*/
+fun void main() {
+    let real := 1.5e2;
+    let flag := true;
+    let ch := 'a';
+    let text := "hi";
+    print real;
+    print flag;
+    print ch;
+    print text;
+    let neg := !false;
+    print neg;
+}

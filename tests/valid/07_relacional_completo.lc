@@ -1,0 +1,19 @@
+/* 07_relacional_completo.lc — Todos os operadores relacionais
+ * Testa: <, >, <=, >=, ==, !=
+ */
+fun void main() {
+    let a := 10 ;
+    let b := 20 ;
+    let r1 := a < b ;
+    let r2 := a > b ;
+    let r3 := a <= 10 ;
+    let r4 := b >= 20 ;
+    let r5 := a == b ;
+    let r6 := a != b ;
+    print r1 ;
+    print r2 ;
+    print r3 ;
+    print r4 ;
+    print r5 ;
+    print r6 ;
+}

@@ -1,0 +1,18 @@
+    beginFunc main
+    local real, 0
+    real = 1.5e2
+    local flag, 4
+    flag = 1
+    local ch, 8
+    ch = 'a'
+    local text, 12
+    text = "hi"
+    print real
+    print flag
+    print ch
+    print text
+    local neg, 16
+    _t1 = !0
+    neg = _t1
+    print neg
+    endFunc main

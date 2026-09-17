@@ -1,0 +1,30 @@
+    beginFunc main
+    local a, 0
+    a = 10
+    local b, 4
+    b = 20
+    local r1, 8
+    _t1 = a < b
+    r1 = _t1
+    local r2, 12
+    _t2 = a > b
+    r2 = _t2
+    local r3, 16
+    _t3 = a <= 10
+    r3 = _t3
+    local r4, 20
+    _t4 = b >= 20
+    r4 = _t4
+    local r5, 24
+    _t5 = a == b
+    r5 = _t5
+    local r6, 28
+    _t6 = a != b
+    r6 = _t6
+    print r1
+    print r2
+    print r3
+    print r4
+    print r5
+    print r6
+    endFunc main

@@ -1,0 +1,10 @@
+    global letra, 1
+    global ativo, 1
+    global total, 4
+    global taxa, 8
+    global buffer, 10
+    beginFunc main
+    local x, 0
+    x = 1
+    print x
+    endFunc main

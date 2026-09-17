@@ -1,0 +1,19 @@
+    beginFunc main
+    local a, 0
+    a = 10
+    local b, 4
+    b = 2
+    local c, 8
+    c = 3
+    local d, 12
+    d = 4
+    local r, 16
+    _t1 = a + b
+    _t2 = d - c
+    _t3 = _t1 * _t2
+    _t4 = b + 1
+    _t5 = _t3 / _t4
+    _t6 = _t5 % 5
+    r = _t6
+    print r
+    endFunc main

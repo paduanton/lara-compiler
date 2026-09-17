@@ -1,0 +1,15 @@
+/* 06_div_mod_unario.lc — Divisão, módulo e negação unária
+ * Testa: /, %, e - unário
+ */
+fun void main() {
+    let a := 100 ;
+    let b := 7 ;
+    let d := a / b ;
+    let m := a % b ;
+    let neg := -a ;
+    let res := -(d + m) ;
+    print d ;
+    print m ;
+    print neg ;
+    print res ;
+}

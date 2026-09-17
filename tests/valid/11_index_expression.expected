@@ -1,0 +1,11 @@
+    global values, 16
+    beginFunc main
+    local index, 0
+    index = 1
+    _t1 = values[index]
+    _t2 = _t1 * 2
+    _t3 = index + 1
+    values[_t3] = _t2
+    _t4 = values[2]
+    print _t4
+    endFunc main

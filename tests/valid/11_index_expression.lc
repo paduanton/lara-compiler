@@ -1,0 +1,6 @@
+array 4 of int values;
+fun void main() {
+    let index := 1;
+    values[index + 1] := values[index] * 2;
+    print values[2];
+}

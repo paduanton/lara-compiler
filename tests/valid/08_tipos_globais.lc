@@ -1,0 +1,13 @@
+/* 08_tipos_globais.lc — Declarações globais com diferentes tipos e tamanhos
+ * Testa: char (1), bool (1), int (4), float (8) e array de char
+ */
+char letra ;
+bool ativo ;
+int total ;
+float taxa ;
+array 10 of char buffer ;
+
+fun void main() {
+    let x := 1 ;
+    print x ;
+}

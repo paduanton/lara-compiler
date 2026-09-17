@@ -1,0 +1,18 @@
+    beginFunc add
+    local sum, 0
+    _t1 = a + b
+    sum = _t1
+    return sum
+    endFunc add
+    beginFunc main
+    local result, 0
+    param 2
+    param 3
+    _t2 = call add 2
+    result = _t2
+    read result
+    param result
+    param 1
+    call add 2
+    print result
+    endFunc main
