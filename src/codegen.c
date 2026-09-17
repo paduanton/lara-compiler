@@ -273,7 +273,7 @@ char *codegen_expr(codegen_ctx_t *ctx, ast_node_t *expr)
             tac_op_t op = op_to_tac(expr->value);
 
             if (op != TAC_NOP) {
-                codegen_emit(ctx, TAC_NOP, tmp, left, right);
+                codegen_emit(ctx, op, tmp, left, right);
             } else {
                 fprintf(stderr, "[CODEGEN] Operador desconhecido: '%s'\n", expr->value);
                 codegen_emit(ctx, TAC_NOP, tmp, left, right);
