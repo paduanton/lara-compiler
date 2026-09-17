@@ -58,6 +58,11 @@ void yyerror(const char *msg)
 %type <node> expr expr_list expr_list_ne
 %type <node> lvalue literal
 
+%destructor { free($$); } <sval>
+%destructor { ast_free($$); } <node>
+/* The driver owns the root, including Bison's cleanup of the start symbol. */
+%destructor { (void)$$; } program
+
 /* lowest to highest precedence */
 %right TK_OC_ASSIGN TK_OC_PLUSEQ TK_OC_MINUSEQ
 %left  TK_OC_OR

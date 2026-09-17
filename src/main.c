@@ -14,12 +14,14 @@ extern ast_node_t *ast_root;      /* set by parser.y's start rule */
 symtab_t *global_symtab = NULL;
 
 extern int yyparse(void);
+extern int yylex_destroy(void);
 extern void main_walk(const ast_node_t *root);
 
 int main(int argc, char *argv[])
 {
     (void)argc;
     (void)argv;
+    int status = 1;
 
     global_symtab = symtab_new();
     if (global_symtab == NULL) {
@@ -31,8 +33,7 @@ int main(int argc, char *argv[])
 
     if (parse_result != 0) {
         fprintf(stderr, "[ETAPA 1] Análise FALHOU (código %d).\n", parse_result);
-        symtab_free(global_symtab);
-        return 1;
+        goto cleanup;
     }
 
     fprintf(stderr, "[ETAPA 1] Análise CONCLUÍDA com SUCESSO.\n");
@@ -45,8 +46,12 @@ int main(int argc, char *argv[])
 
     symtab_print(global_symtab, stdout);
 
+    status = 0;
+
+cleanup:
+    yylex_destroy();
     ast_free(ast_root);
     symtab_free(global_symtab);
 
-    return 0;
+    return status;
 }
