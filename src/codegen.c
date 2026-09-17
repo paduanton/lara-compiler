@@ -157,7 +157,19 @@ void codegen_stmt(codegen_ctx_t *ctx, ast_node_t *stmt)
 
         case AST_ASSIGN: {
             if (strcmp(stmt->value, ":=") == 0) {
-                fprintf(stderr, "[CODEGEN] Assignment is not implemented yet.\n");
+                ast_node_t *lvalue = stmt->children[0];
+                char *rval = codegen_expr(ctx, stmt->children[1]);
+                if (lvalue->type == AST_SYMBOL) {
+                    codegen_emit(ctx, TAC_COPY, lvalue->value, rval, NULL);
+                } else if (lvalue->type == AST_EXPR_INDEX) {
+                    char *index = codegen_expr(ctx, lvalue->children[0]);
+                    codegen_emit(ctx, TAC_STORE, lvalue->value, index, rval);
+                    free(index);
+                } else {
+                    fprintf(stderr, "[CODEGEN] Destino de atribuição não suportado: tipo=%d\n",
+                            lvalue->type);
+                }
+                free(rval);
             } else if (strcmp(stmt->value, "+=") == 0) {
 
                 char *lname = stmt->children[0]->value;
