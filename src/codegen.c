@@ -65,10 +65,28 @@ void codegen_emit(codegen_ctx_t *ctx, tac_op_t op,
 void codegen_program(codegen_ctx_t *ctx, ast_node_t *program)
 {
     if (!program) return;
+
     ast_node_t *decl = program->children[0];
+    int global_offset = 0;
+
     while (decl) {
-        if (decl->type == AST_FUN_DECL)
+        if (decl->type == AST_FUN_DECL) {
             codegen_fun(ctx, decl);
+        } else if (decl->type == AST_VAR_DECL || decl->type == AST_ARRAY_DECL) {
+            sym_entry_t *entry = symtab_lookup(ctx->symtab, decl->value);
+            if (entry) {
+                int size = type_size(entry->datatype);
+                if (decl->type == AST_ARRAY_DECL)
+                    size *= entry->array_size;
+                entry->scope = SYM_SCOPE_GLOBAL;
+                entry->offset = global_offset;
+                global_offset += size;
+                char size_str[16];
+                snprintf(size_str, sizeof(size_str), "%d", size);
+                codegen_emit(ctx, TAC_DECL_GLOBAL, decl->value, size_str, NULL);
+            }
+        }
+
         decl = decl->next;
     }
 }
