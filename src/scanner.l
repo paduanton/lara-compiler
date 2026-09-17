@@ -21,6 +21,8 @@ extern symtab_t *global_symtab;
 
 %option noyywrap
 %option yylineno
+%option noinput nounput
+%x BLOCK_COMMENT
 
 DIGIT       [0-9]
 LETTER      [a-zA-Z_]
@@ -36,15 +38,15 @@ FLOAT       ({DIGIT}*"."{DIGIT}+|{DIGIT}+"."{DIGIT}*)([eE][+-]?{DIGIT}+)?
 
 "//".*      { }
 
-"/*"        {
-    int c, prev = 0;
-    while ((c = input()) != EOF) {
-        if (prev == '*' && c == '/') break;
-        if (c == '\n') yylineno++;
-        prev = c;
-    }
-    if (c == EOF)
-        LEX_ERROR("comentário de bloco não fechado");
+"/*"                       { BEGIN(BLOCK_COMMENT); }
+<BLOCK_COMMENT>"*/"         { BEGIN(INITIAL); }
+<BLOCK_COMMENT>[^*\n]+      { }
+<BLOCK_COMMENT>"*"          { }
+<BLOCK_COMMENT>\n           { }
+<BLOCK_COMMENT><<EOF>> {
+    LEX_ERROR("comentário de bloco não fechado");
+    BEGIN(INITIAL);
+    return TK_ERROR;
 }
 
 "int"       { return TK_PR_INT;    }
