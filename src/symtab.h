@@ -1,9 +1,8 @@
 /*
  * symtab.h — Symbol table interface
  *
- * Chained hash table (SYMTAB_SIZE buckets). At this stage every identifier
- * is inserted with nature/datatype unknown; `nature`, `datatype`, `offset`,
- * and nested scoping are unused placeholders for later stages.
+ * Chained hash table (SYMTAB_SIZE buckets), with declaration metadata and
+ * byte offsets. Identifiers share a flat namespace at this stage.
  */
 
 #ifndef SYMTAB_H
@@ -30,12 +29,16 @@ typedef enum {
     SYM_TYPE_STRING  = 6   /* literals only — not a variable type */
 } sym_datatype_t;
 
+typedef enum { SYM_SCOPE_GLOBAL = 0, SYM_SCOPE_LOCAL = 1 } sym_scope_t;
+
 typedef struct sym_entry {
     char           *lexeme;
     int             lineno;    /* first occurrence */
     sym_nature_t    nature;
     sym_datatype_t  datatype;
     int             offset;
+    sym_scope_t     scope;
+    int             array_size;
     struct sym_entry *next;    /* collision chain */
 } sym_entry_t;
 

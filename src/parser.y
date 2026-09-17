@@ -22,6 +22,17 @@ void yyerror(const char *msg)
     fprintf(stderr, "[ERRO SINTÁTICO] linha %d: %s (token: '%s')\n",
             yylineno, msg, yytext);
 }
+
+static sym_datatype_t str_to_datatype(const char *name)
+{
+    if (!name) return SYM_TYPE_UNKNOWN;
+    if (strcmp(name, "int") == 0) return SYM_TYPE_INT;
+    if (strcmp(name, "float") == 0) return SYM_TYPE_FLOAT;
+    if (strcmp(name, "char") == 0) return SYM_TYPE_CHAR;
+    if (strcmp(name, "bool") == 0) return SYM_TYPE_BOOL;
+    if (strcmp(name, "void") == 0) return SYM_TYPE_VOID;
+    return SYM_TYPE_UNKNOWN;
+}
 %}
 
 %union {
@@ -52,7 +63,7 @@ void yyerror(const char *msg)
 %type <node> fun_decl param_list param_list_ne param
 %type <node> var_decl array_decl
 %type <node> type_spec
-%type <node> block stmt_list stmt simple_stmt compound_stmt
+%type <node> block stmt_list stmt simple_stmt compound_stmt var_local
 %type <node> assign_stmt if_stmt while_stmt for_stmt
 %type <node> return_stmt print_stmt read_stmt call_stmt
 %type <node> expr expr_list expr_list_ne
@@ -140,6 +151,11 @@ var_decl
         {
             $$ = ast_new(AST_VAR_DECL, $2, yylineno);
             $$->children[0] = $1;
+            sym_entry_t *entry = symtab_lookup(global_symtab, $2);
+            if (entry) {
+                entry->nature = SYM_VAR;
+                entry->datatype = str_to_datatype($1->value);
+            }
             free($2);
         }
     ;
@@ -150,6 +166,12 @@ array_decl
             $$ = ast_new(AST_ARRAY_DECL, $5, yylineno);
             $$->children[0] = ast_new(AST_LIT_INT, $2, yylineno);  /* size */
             $$->children[1] = $4;                                    /* element type */
+            sym_entry_t *entry = symtab_lookup(global_symtab, $5);
+            if (entry) {
+                entry->nature = SYM_ARRAY;
+                entry->datatype = str_to_datatype($4->value);
+                entry->array_size = atoi($2);
+            }
             free($2);
             free($5);
         }
@@ -193,7 +215,7 @@ simple_stmt
     | print_stmt   { $$ = $1; }
     | read_stmt    { $$ = $1; }
     | call_stmt    { $$ = $1; }
-    | var_local    { $$ = NULL; }
+    | var_local    { $$ = $1; }
     ;
 
 compound_stmt
@@ -205,10 +227,9 @@ compound_stmt
 var_local
     : TK_PR_LET TK_ID TK_OC_ASSIGN expr
         {
-            /* no AST_VAR_DECL node yet at this stage — the identifier is
-             * already tracked via the scanner's symtab_insert */
             symtab_insert(global_symtab, $2, yylineno);
-            ast_free($4);
+            $$ = ast_new(AST_VAR_DECL, $2, yylineno);
+            $$->children[1] = $4;
             free($2);
         }
     ;
