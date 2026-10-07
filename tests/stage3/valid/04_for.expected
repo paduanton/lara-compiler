@@ -1,0 +1,19 @@
+    beginFunc main
+    local prod, 0
+    prod = 1
+    local i, 4
+    i = 1
+    i = 1
+_L1:
+    _t1 = i <= 5
+    ifTrue _t1 goto _L2
+    ifFalse _t1 goto _L3
+_L2:
+    _t2 = prod * i
+    prod = _t2
+    _t3 = i + 1
+    i = _t3
+    goto _L1
+_L3:
+    print prod
+    endFunc main

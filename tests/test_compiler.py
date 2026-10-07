@@ -21,6 +21,14 @@ class CompilerTests(unittest.TestCase):
         self.assertEqual(result.stderr, b'')
         self.assertEqual(execute(result.stdout.decode(), parameters), expected)
 
+    def test_stage3_execution(self):
+        for stem, expected in [('01_if_simples', [5, 0]), ('02_if_else', [0]),
+                               ('03_while', [10]), ('04_for', [120]),
+                               ('05_and_or', [1, 2]), ('06_fatorial', [120])]:
+            with self.subTest(stem=stem):
+                self.evaluate((ROOT/'tests/stage3/valid'/f'{stem}.lc').read_bytes(),
+                              expected, {'fatorial': ('n',)})
+
     def test_short_circuit_conditions(self):
         self.evaluate(b'''fun int probe(){print 99; return 1;}
             fun void main(){
@@ -37,6 +45,21 @@ class CompilerTests(unittest.TestCase):
                 let c := !(true && probe()); print c;
                 print (false && (1 / 0)) == false;
             }''', [0, 1, 99, 0, 1])
+
+    def test_nested_loops_and_branches(self):
+        self.evaluate(b'''fun void main(){let i := 0; let j := 0; let sum := 0;
+            while(i < 3) do {
+                if(i == 1){sum += 10;}else{sum += 1;}
+                for(j := 0; j < 2; j += 1){sum += j;}
+                i += 1;
+            } print sum;}''', [15])
+
+    def test_zero_iteration_loops(self):
+        self.evaluate(b'''fun void main(){let i := 0;
+            while(false) do {print 1 / 0;}
+            for(i := 0; i < 0; i += 1){print 1 / 0;}
+            if(false){print 1;}else{print 2;}
+            }''', [2])
 
     def test_empty_program(self):
         result = compile_source(b"")
