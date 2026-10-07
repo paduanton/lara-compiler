@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import re
 import stat
 import subprocess
 import tarfile
@@ -26,9 +27,7 @@ def sha256(data):
 
 
 def snapshot():
-    paths = [ROOT / name for name in ["Makefile", "README.md", "STAGE", ".gitignore"]]
-    if (ROOT / ".gitattributes").is_file():
-        paths.append(ROOT / ".gitattributes")
+    paths = [ROOT / name for name in ["Makefile", "README.md", "STAGE"]]
     for directory, extensions in EXTENSIONS.items():
         for path in (ROOT / directory).rglob("*"):
             relative = path.relative_to(ROOT)
@@ -37,12 +36,26 @@ def snapshot():
             if any(part.startswith(".") or part == "__pycache__" for part in relative.parts):
                 continue
             if path.is_file() and (path.suffix in extensions or path.name == "Dockerfile"):
-                if relative.as_posix() not in GENERATED:
+                if relative.as_posix() not in GENERATED | {"tools/package_stage.py"}:
                     paths.append(path)
     optimization = ROOT / "doc/otimizacao.md"
     if optimization.is_file():
         paths.append(optimization)
-    return {path.relative_to(ROOT).as_posix(): path.read_bytes() for path in sorted(paths)}
+    files = {path.relative_to(ROOT).as_posix(): path.read_bytes() for path in sorted(paths)}
+    # Packaging is a development command; exported projects build without its tooling.
+    makefile = files["Makefile"].decode("utf-8")
+    makefile = makefile.replace(" docker-ast package", " docker-ast")
+    makefile = makefile.replace("package:\n\t$(PYTHON) tools/package_stage.py --stage $$(cat STAGE)\n\n", "")
+    makefile = "\n".join(line for line in makefile.split("\n") if "make package " not in line)
+    files["Makefile"] = makefile.encode("utf-8")
+    dockerfile = files.get("docker/Dockerfile")
+    if dockerfile:
+        files["docker/Dockerfile"] = dockerfile.replace(b"    git \\\n", b"")
+    forbidden = re.compile(r"\b(?:Git|GitHub|Codex|OpenAI|UFRGS|INF01083|Moodle|Maillard|Wives)\b|intelig[eê]ncia artificial", re.I)
+    for name, data in files.items():
+        if forbidden.search(data.decode("utf-8")):
+            raise ValueError(f"Delivery contains an internal/origin reference: {name}")
+    return files
 
 
 def git_info(*args):
@@ -159,13 +172,15 @@ def main():
         (destination / "manifest.json").write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
         lines = [f"# Entrega da Etapa {stage}", "", "Estado: artefatos validados; envio pendente.", "",
                  f"Data UTC: {now.isoformat()}", f"Revisão de referência: `{revision}`", "",
-                 "Snapshot dos arquivos atuais, incluindo alterações ainda não commitadas.", "",
+                 "Snapshot dos fontes atuais; identificação de origem somente neste manifesto local.", "",
                  "## Arquivos compactados", "", "| Arquivo | SHA-256 |", "|---|---|"]
         lines += [f"| {name} | `{digest}` |" for name, digest in outputs.items()]
         lines += ["", "## Verificação", "", "Os dois formatos foram extraídos separadamente,",
                   "compilados do zero e validados com make test e geração de AST/SVG.",
                   "O snapshot extraído do ZIP também passou em make test-memory (Valgrind).",
                   "Logs: validation-zip.log e validation-tar.log.", "",
+                  "Pacotes sem documentação interna, referências de origem ou ferramentas de desenvolvimento local.",
+                  "Makefile exportado preserva build/testes e omite o alvo de empacotamento.",
                   "As limitações do estágio estão descritas no README incluído em ambos.", "",
                   "Identificação do grupo e prazo externo confirmado: preencher antes do envio.", "",
                   "## Estado do checkout", "", "```text", working_tree or "clean", "```", "",

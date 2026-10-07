@@ -1,4 +1,4 @@
-# Makefile — LARA compiler (Stage 2: basic TAC)
+# Makefile — LARA compiler (Stage 3: control flow)
 #
 # Usage:
 #   make           — build ./lara
@@ -116,7 +116,7 @@ docker-ast:
 	$(COMPOSE) run --rm dev make ast
 
 package:
-	$(PYTHON) tools/package_stage.py --stage 2
+	$(PYTHON) tools/package_stage.py --stage $$(cat STAGE)
 
 help:
 	@echo "Alvos disponíveis:"
