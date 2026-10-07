@@ -302,8 +302,26 @@ void codegen_stmt(codegen_ctx_t *ctx, ast_node_t *stmt)
             break;
         }
 
-        case AST_WHILE:
+        case AST_WHILE: {
+            char *begin_label = tac_new_label();
+            codegen_emit(ctx, TAC_LABEL, begin_label, NULL, NULL);
+            bool_result_t condition = codegen_bool_expr(ctx, stmt->children[0]);
+            char *body_label = tac_new_label();
+            patch_list_backpatch(condition.true_list, body_label);
+            codegen_emit(ctx, TAC_LABEL, body_label, NULL, NULL);
+            codegen_stmt(ctx, stmt->children[1]);
+            codegen_emit(ctx, TAC_JUMP, begin_label, NULL, NULL);
+            char *end_label = tac_new_label();
+            patch_list_backpatch(condition.false_list, end_label);
+            codegen_emit(ctx, TAC_LABEL, end_label, NULL, NULL);
+            patch_list_free(condition.true_list);
+            patch_list_free(condition.false_list);
+            free(begin_label);
+            free(body_label);
+            free(end_label);
             break;
+        }
+
         case AST_FOR:
             break;
 

@@ -1,0 +1,18 @@
+    beginFunc main
+    local i, 0
+    i = 0
+    local soma, 4
+    soma = 0
+_L1:
+    _t1 = i < 5
+    ifTrue _t1 goto _L2
+    ifFalse _t1 goto _L3
+_L2:
+    _t2 = soma + i
+    soma = _t2
+    _t3 = i + 1
+    i = _t3
+    goto _L1
+_L3:
+    print soma
+    endFunc main
