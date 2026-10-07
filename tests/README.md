@@ -1,26 +1,27 @@
-# Testes
+# Testes do compilador
 
-Execute `make test` ou `bash tests/run_tests.sh` no Linux. O script recompila o projeto e executa
-as verificações Python; `make test` também compila e executa os testes de estruturas em C.
+Execute `make test` e `make test-memory` no ambiente Linux ou Docker.
 
-- `valid/01` a `valid/09`: entradas da base da Etapa 2.
-- `01_soma.expected` e `02_assign.expected`: resultados originais preservados byte a byte.
-- Resultados `03` a `09`: expectativas do projeto, derivadas manualmente da especificação e
-  do contrato de impressão TAC. Não são geradas pela execução do compilador em teste.
-- Entradas/resultados `10` a `12`: chamadas e reinício de frame, índice calculado com avaliação
-  do lado direito primeiro, literais e comentários. São regressões acrescentadas pelo projeto.
-- `frontend/`: os seis programas válidos e seis inválidos da Etapa 1, executados com `--ast`.
-- `invalid/`: sete entradas da base da Etapa 2 e duas regressões de comentário/expressão inválida.
+- `frontend/`: 12 entradas originais da primeira etapa, preservadas integralmente.
+- `valid/` e `invalid/`: testes da segunda etapa, com comparação TAC byte a byte.
+- `stage3/`: seis programas válidos com condicionais, laços, curto-circuito e
+  recursão, além de seis entradas inválidas.
+- `test_core.c`: offsets, temporários, estatísticas da AST, representação TAC e
+  propriedade/resolução das listas de saltos.
+- `tac_vm.py`: avaliador restrito aos casos de teste, usado para conferir resultados
+  de execução e efeitos observáveis; não é um backend do compilador.
 
-Uma saída esperada ausente ou diferente torna a suíte TAC inválida. Todos os casos de rejeição
-exigem código 1, diagnósticos e stdout vazio; crashes e timeouts não contam como rejeição correta.
-Há ainda verificações de linhas após comentários, EOF em comentários, espaço em branco e
-expoentes, opções inválidas e preservação da AST para o conversor Graphviz.
+Os dois primeiros resultados esperados da segunda etapa foram preservados.
+Os demais resultados dessa etapa foram derivados manualmente das operações e
+convenções TAC. Nenhum resultado esperado é gerado pelo compilador sob teste.
 
-`test_core.c` verifica offsets diretamente na tabela, temporários entre funções, estatísticas
-da AST e o contrato `TAC_STORE(result=array, arg1=index, arg2=value)`. A lista TAC duplica strings;
-o teste também confere que alterar a string de origem não altera a instrução.
+Os resultados da terceira etapa seguem o fluxo e os rótulos descritos nas tarefas,
+com os contratos efetivos da implementação: locais de tipo desconhecido avançam
+4 bytes, parâmetros usam offsets negativos e não emitem declarações locais, e
+funções não recebem retornos implícitos. Os resultados de referência descreviam
+outros offsets e retornos; a adaptação dessas diferenças foi explícita.
 
-`make test-memory` executa Valgrind nas entradas válidas e inválidas de ambas as suítes, no
-programa vazio, em comentários incompletos e no teste de estruturas. Erros de memória usam o
-código 99, distinguindo-os da rejeição sintática esperada (1).
+A suíte exige resultado esperado para cada entrada válida e falha em diferenças,
+erros de execução ou timeouts. Também verifica destinos de salto definidos e
+rótulos únicos. Casos de execução cobrem curto-circuito com efeitos observáveis,
+valores booleanos, negação, laços aninhados e laços com zero iterações.
