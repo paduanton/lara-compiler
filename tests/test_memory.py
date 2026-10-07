@@ -19,7 +19,8 @@ def check(command, source, expected_status, label):
 def main():
     compiler = str(Path(sys.argv[1] if len(sys.argv) > 1 else ROOT / "lara").resolve())
     core = str(Path(sys.argv[2] if len(sys.argv) > 2 else ROOT / "tests/core_tests").resolve())
-    for folder, args in [(ROOT / "tests", []), (ROOT / "tests/frontend", ["--ast"])]:
+    for folder, args in [(ROOT / "tests", []), (ROOT / "tests/frontend", ["--ast"]),
+                         (ROOT / "tests/stage3", [])]:
         for category, status in [("valid", 0), ("invalid", 1)]:
             paths = sorted((folder / category).glob("*.lc"))
             if not paths:
@@ -30,6 +31,11 @@ def main():
     check([compiler], b"/*", 1, "comment at EOF")
     check([compiler], b"int a; /* tail", 1, "comment after declaration")
     check([core], b"", 0, "core structures")
+    check([compiler], b'''fun int probe(){return 1;}
+        fun void main(){let a := !(false && probe());
+            if(a || probe()){while(false) do {print 1;}}
+            for(a := 0; a < 2; a += 1){if(a){print 2;}else{print 3;}}
+        }''', 0, "nested backpatch lists and boolean values")
 
 
 if __name__ == "__main__":
