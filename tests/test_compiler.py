@@ -4,6 +4,7 @@ from pathlib import Path
 import subprocess
 import sys
 import unittest
+from tac_vm import execute
 
 ROOT = Path(__file__).resolve().parents[1]
 COMPILER = (ROOT / "lara").resolve()
@@ -14,6 +15,20 @@ def compile_source(source, *args):
 
 
 class CompilerTests(unittest.TestCase):
+    def evaluate(self, source, expected, parameters=None):
+        result = compile_source(source)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stderr, b'')
+        self.assertEqual(execute(result.stdout.decode(), parameters), expected)
+
+    def test_short_circuit_values(self):
+        self.evaluate(b'''fun int probe(){print 99; return 1;}
+            fun void main(){let a := false && probe(); print a;
+                let b := true || probe(); print b;
+                let c := !(true && probe()); print c;
+                print (false && (1 / 0)) == false;
+            }''', [0, 1, 99, 0, 1])
+
     def test_empty_program(self):
         result = compile_source(b"")
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -79,6 +94,13 @@ def fixture_test(path, valid, frontend):
                 fromfile=expected.name, tofile="actual"))
             self.assertEqual(result.stdout, expected_bytes, diff)
             self.assertEqual(result.stderr, b"")
+            text = result.stdout.decode()
+            labels = [line[:-1] for line in text.splitlines() if line.endswith(':')]
+            self.assertEqual(len(labels), len(set(labels)), 'Duplicate TAC labels')
+            self.assertNotIn('???', text)
+            for line in text.splitlines():
+                if 'goto ' in line:
+                    self.assertIn(line.split('goto ')[1], labels)
     return run
 
 
@@ -89,7 +111,8 @@ def add_fixtures():
             if not paths:
                 raise RuntimeError(f"Missing test inputs: {folder / category}")
             for path in paths:
-                name = f"test_{'frontend' if frontend else 'tac'}_{category}_{path.stem}"
+                group = 'frontend' if frontend else ('stage3' if folder.name == 'stage3' else 'tac')
+                name = f"test_{group}_{category}_{path.stem}"
                 setattr(CompilerTests, name, fixture_test(path, category == "valid", frontend))
 
 

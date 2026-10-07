@@ -31,6 +31,8 @@ void codegen_stmt(codegen_ctx_t *ctx, ast_node_t *stmt);
 /* Returns an owned address string; the caller must free it after emission. */
 char *codegen_expr(codegen_ctx_t *ctx, ast_node_t *expr);
 
+/* The caller resolves both jump lists and frees their nodes. */
+bool_result_t codegen_bool_expr(codegen_ctx_t *ctx, ast_node_t *expr);
 
 void codegen_emit(codegen_ctx_t *ctx, tac_op_t op,
                   const char *result, const char *arg1, const char *arg2);

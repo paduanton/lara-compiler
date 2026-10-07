@@ -129,6 +129,46 @@ void codegen_fun(codegen_ctx_t *ctx, ast_node_t *fun_decl)
     codegen_emit(ctx, TAC_ENDFUNC, fname, NULL, NULL);
 }
 
+bool_result_t codegen_bool_expr(codegen_ctx_t *ctx, ast_node_t *expr)
+{
+    bool_result_t res = { NULL, NULL };
+    if (!expr) return res;
+
+    if (expr->type == AST_EXPR_UNARY && strcmp(expr->value, "!") == 0) {
+        bool_result_t operand = codegen_bool_expr(ctx, expr->children[0]);
+        res.true_list = operand.false_list;
+        res.false_list = operand.true_list;
+    } else if (expr->type == AST_EXPR_BINARY &&
+               (strcmp(expr->value, "&&") == 0 || strcmp(expr->value, "||") == 0)) {
+        bool_result_t left = codegen_bool_expr(ctx, expr->children[0]);
+        char *mid = tac_new_label();
+        int is_and = strcmp(expr->value, "&&") == 0;
+        patch_list_t *continue_list = is_and ? left.true_list : left.false_list;
+        patch_list_backpatch(continue_list, mid);
+        codegen_emit(ctx, TAC_LABEL, mid, NULL, NULL);
+        patch_list_free(continue_list);
+        free(mid);
+        bool_result_t right = codegen_bool_expr(ctx, expr->children[1]);
+        if (is_and) {
+            res.true_list = right.true_list;
+            res.false_list = patch_list_merge(left.false_list, right.false_list);
+        } else {
+            res.true_list = patch_list_merge(left.true_list, right.true_list);
+            res.false_list = right.false_list;
+        }
+    } else {
+        char *value = codegen_expr(ctx, expr);
+        tac_instr_t *jt = tac_new(TAC_JUMPT, "???", value, NULL);
+        tac_instr_t *jf = tac_new(TAC_JUMPF, "???", value, NULL);
+        ctx->code = tac_append(ctx->code, jt);
+        ctx->code = tac_append(ctx->code, jf);
+        res.true_list = patch_list_make(jt);
+        res.false_list = patch_list_make(jf);
+        free(value);
+    }
+    return res;
+}
+
 void codegen_stmt(codegen_ctx_t *ctx, ast_node_t *stmt)
 {
     if (!stmt) return;
@@ -279,6 +319,27 @@ char *codegen_expr(codegen_ctx_t *ctx, ast_node_t *expr)
         }
 
         case AST_EXPR_BINARY: {
+            if (strcmp(expr->value, "&&") == 0 || strcmp(expr->value, "||") == 0) {
+                bool_result_t condition = codegen_bool_expr(ctx, expr);
+                char *result = tac_new_temp();
+                char *true_label = tac_new_label();
+                char *false_label = tac_new_label();
+                char *end_label = tac_new_label();
+                patch_list_backpatch(condition.true_list, true_label);
+                patch_list_backpatch(condition.false_list, false_label);
+                codegen_emit(ctx, TAC_LABEL, true_label, NULL, NULL);
+                codegen_emit(ctx, TAC_COPY, result, "1", NULL);
+                codegen_emit(ctx, TAC_JUMP, end_label, NULL, NULL);
+                codegen_emit(ctx, TAC_LABEL, false_label, NULL, NULL);
+                codegen_emit(ctx, TAC_COPY, result, "0", NULL);
+                codegen_emit(ctx, TAC_LABEL, end_label, NULL, NULL);
+                patch_list_free(condition.true_list);
+                patch_list_free(condition.false_list);
+                free(true_label);
+                free(false_label);
+                free(end_label);
+                return result;
+            }
             char *left  = codegen_expr(ctx, expr->children[0]);
             char *right = codegen_expr(ctx, expr->children[1]);
             char *tmp   = tac_new_temp();
