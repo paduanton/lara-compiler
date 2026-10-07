@@ -26,6 +26,7 @@ C_SRCS = $(SRCDIR)/ast.c \
          $(SRCDIR)/symtab.c \
          $(SRCDIR)/ast_walk.c \
          $(SRCDIR)/tac.c \
+         $(SRCDIR)/backpatch.c \
          $(SRCDIR)/codegen.c \
          $(SRCDIR)/main.c
 
@@ -69,13 +70,14 @@ $(SRCDIR)/ast.o:        $(SRCDIR)/ast.c $(SRCDIR)/ast.h
 $(SRCDIR)/symtab.o:     $(SRCDIR)/symtab.c $(SRCDIR)/symtab.h
 $(SRCDIR)/ast_walk.o:   $(SRCDIR)/ast_walk.c $(SRCDIR)/ast.h
 $(SRCDIR)/tac.o:        $(SRCDIR)/tac.c $(SRCDIR)/tac.h
-$(SRCDIR)/codegen.o:    $(SRCDIR)/codegen.c $(SRCDIR)/codegen.h $(SRCDIR)/tac.h $(SRCDIR)/ast.h $(SRCDIR)/symtab.h
-$(SRCDIR)/main.o:       $(SRCDIR)/main.c $(SRCDIR)/ast.h $(SRCDIR)/symtab.h $(SRCDIR)/codegen.h $(SRCDIR)/tac.h
+$(SRCDIR)/backpatch.o:  $(SRCDIR)/backpatch.c $(SRCDIR)/backpatch.h $(SRCDIR)/tac.h
+$(SRCDIR)/codegen.o:    $(SRCDIR)/codegen.c $(SRCDIR)/codegen.h $(SRCDIR)/backpatch.h $(SRCDIR)/tac.h $(SRCDIR)/ast.h $(SRCDIR)/symtab.h
+$(SRCDIR)/main.o:       $(SRCDIR)/main.c $(SRCDIR)/ast.h $(SRCDIR)/symtab.h $(SRCDIR)/codegen.h $(SRCDIR)/backpatch.h $(SRCDIR)/tac.h
 
 CORE_OBJS = $(filter-out $(SRCDIR)/main.o,$(OBJS))
 TEST_CORE = tests/core_tests
 
-$(TEST_CORE): tests/test_core.c $(CORE_OBJS) $(SRCDIR)/ast.h $(SRCDIR)/symtab.h $(SRCDIR)/codegen.h $(SRCDIR)/tac.h
+$(TEST_CORE): tests/test_core.c $(CORE_OBJS) $(SRCDIR)/ast.h $(SRCDIR)/symtab.h $(SRCDIR)/codegen.h $(SRCDIR)/backpatch.h $(SRCDIR)/tac.h
 	$(CC) $(CFLAGS) -o $@ tests/test_core.c $(CORE_OBJS)
 
 clean:

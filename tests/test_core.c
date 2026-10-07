@@ -123,11 +123,42 @@ static void test_store_contract(void)
     tac_free(store);
 }
 
+static void test_patch_lists(void)
+{
+    tac_instr_t *first = tac_new(TAC_JUMPT, "???", "a", NULL);
+    tac_instr_t *second = tac_new(TAC_JUMPF, "???", "b", NULL);
+    tac_instr_t *third = tac_new(TAC_JUMP, "???", NULL, NULL);
+    patch_list_t *left = patch_list_make(first);
+    patch_list_t *right = patch_list_merge(patch_list_make(second), patch_list_make(third));
+    assert(patch_list_merge(NULL, NULL) == NULL);
+    assert(patch_list_merge(NULL, left) == left);
+    assert(patch_list_merge(left, NULL) == left);
+    patch_list_t *merged = patch_list_merge(left, right);
+    assert(merged->instr == first && merged->next->instr == second);
+    assert(merged->next->next->instr == third && !merged->next->next->next);
+    char label[] = "_L7";
+    patch_list_backpatch(merged, label);
+    label[2] = '9';
+    assert(strcmp(first->result, "_L7") == 0);
+    assert(strcmp(second->result, "_L7") == 0);
+    assert(strcmp(third->result, "_L7") == 0);
+    assert(first->result != second->result);
+    patch_list_backpatch(merged, "_L8");
+    patch_list_free(merged);
+    assert(strcmp(first->result, "_L8") == 0);
+    assert(strcmp(second->result, "_L8") == 0);
+    assert(strcmp(third->result, "_L8") == 0);
+    tac_free(first);
+    tac_free(second);
+    tac_free(third);
+}
+
 int main(void)
 {
     test_offsets();
     test_ast_statistics();
     test_store_contract();
-    puts("OK: symbol offsets, temporary names, AST statistics and TAC storage");
+    test_patch_lists();
+    puts("OK: symbol offsets, temporary names, AST statistics, TAC storage and jump lists");
     return 0;
 }
