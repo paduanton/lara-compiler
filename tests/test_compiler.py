@@ -21,6 +21,15 @@ class CompilerTests(unittest.TestCase):
         self.assertEqual(result.stderr, b'')
         self.assertEqual(execute(result.stdout.decode(), parameters), expected)
 
+    def test_short_circuit_conditions(self):
+        self.evaluate(b'''fun int probe(){print 99; return 1;}
+            fun void main(){
+                if(false && probe()){print 1;}
+                if(true || probe()){print 2;}
+                if(!(false && probe())){print 3;}
+                if((true || probe()) && (false || probe())){print 4;}
+            }''', [2, 3, 99, 4])
+
     def test_short_circuit_values(self):
         self.evaluate(b'''fun int probe(){print 99; return 1;}
             fun void main(){let a := false && probe(); print a;
@@ -105,7 +114,8 @@ def fixture_test(path, valid, frontend):
 
 
 def add_fixtures():
-    for folder, frontend in [(ROOT / "tests", False), (ROOT / "tests/frontend", True)]:
+    for folder, frontend in [(ROOT / "tests", False), (ROOT / "tests/frontend", True),
+                             (ROOT / "tests/stage3", False)]:
         for category in ["valid", "invalid"]:
             paths = sorted((folder / category).glob("*.lc"))
             if not paths:

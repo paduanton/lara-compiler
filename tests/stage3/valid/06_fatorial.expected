@@ -1,0 +1,24 @@
+    beginFunc fatorial
+    _t1 = n <= 1
+    ifTrue _t1 goto _L1
+    ifFalse _t1 goto _L3
+_L1:
+    return 1
+    goto _L2
+_L3:
+    local r, 0
+    _t2 = n - 1
+    param _t2
+    _t3 = call fatorial 1
+    r = _t3
+    _t4 = n * r
+    return _t4
+_L2:
+    endFunc fatorial
+    beginFunc main
+    local f, 0
+    param 5
+    _t5 = call fatorial 1
+    f = _t5
+    print f
+    endFunc main

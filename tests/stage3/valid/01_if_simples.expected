@@ -1,0 +1,11 @@
+    beginFunc main
+    local x, 0
+    x = 5
+    _t1 = x > 0
+    ifTrue _t1 goto _L1
+    ifFalse _t1 goto _L2
+_L1:
+    print x
+_L2:
+    print 0
+    endFunc main

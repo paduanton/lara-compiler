@@ -1,0 +1,26 @@
+    beginFunc main
+    local a, 0
+    a = 5
+    local b, 4
+    b = 10
+    _t1 = a > 0
+    ifTrue _t1 goto _L1
+    ifFalse _t1 goto _L3
+_L1:
+    _t2 = b < 20
+    ifTrue _t2 goto _L2
+    ifFalse _t2 goto _L3
+_L2:
+    print 1
+_L3:
+    _t3 = a == 0
+    ifTrue _t3 goto _L5
+    ifFalse _t3 goto _L4
+_L4:
+    _t4 = b > 5
+    ifTrue _t4 goto _L5
+    ifFalse _t4 goto _L6
+_L5:
+    print 2
+_L6:
+    endFunc main

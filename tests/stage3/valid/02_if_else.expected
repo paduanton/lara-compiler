@@ -1,0 +1,15 @@
+    beginFunc main
+    local a, 0
+    a = 3
+    local b, 4
+    b = 7
+    _t1 = a == b
+    ifTrue _t1 goto _L1
+    ifFalse _t1 goto _L3
+_L1:
+    print 1
+    goto _L2
+_L3:
+    print 0
+_L2:
+    endFunc main

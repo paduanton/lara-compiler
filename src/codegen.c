@@ -277,10 +277,34 @@ void codegen_stmt(codegen_ctx_t *ctx, ast_node_t *stmt)
             break;
         }
 
-        case AST_IF:
+        case AST_IF: {
+            bool_result_t condition = codegen_bool_expr(ctx, stmt->children[0]);
+            char *then_label = tac_new_label();
+            char *end_label = tac_new_label();
+            patch_list_backpatch(condition.true_list, then_label);
+            codegen_emit(ctx, TAC_LABEL, then_label, NULL, NULL);
+            codegen_stmt(ctx, stmt->children[1]);
+            if (stmt->children[2]) {
+                char *else_label = tac_new_label();
+                codegen_emit(ctx, TAC_JUMP, end_label, NULL, NULL);
+                patch_list_backpatch(condition.false_list, else_label);
+                codegen_emit(ctx, TAC_LABEL, else_label, NULL, NULL);
+                codegen_stmt(ctx, stmt->children[2]);
+                free(else_label);
+            } else {
+                patch_list_backpatch(condition.false_list, end_label);
+            }
+            codegen_emit(ctx, TAC_LABEL, end_label, NULL, NULL);
+            patch_list_free(condition.true_list);
+            patch_list_free(condition.false_list);
+            free(then_label);
+            free(end_label);
+            break;
+        }
+
         case AST_WHILE:
+            break;
         case AST_FOR:
-            fprintf(stderr, "[CODEGEN] Controle de fluxo: implementar na Etapa 3.\n");
             break;
 
         default:
